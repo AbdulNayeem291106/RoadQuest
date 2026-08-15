@@ -1,6 +1,7 @@
 /* =========================================
    ROADQUEST
-   Phase 4 - Basic Game Foundation
+   PHASE 5
+   Runner Movement + Swipe Controls
 ========================================= */
 
 const player = document.getElementById("player");
@@ -8,27 +9,40 @@ const player = document.getElementById("player");
 const startScreen = document.getElementById("startScreen");
 const startButton = document.getElementById("startButton");
 
-const leftButton = document.getElementById("leftButton");
-const rightButton = document.getElementById("rightButton");
-const jumpButton = document.getElementById("jumpButton");
-
 const coinCount = document.getElementById("coinCount");
 const balloonCount = document.getElementById("balloonCount");
 const giftCount = document.getElementById("giftCount");
 
+
+/* =========================================
+   GAME STATE
+========================================= */
+
 let gameStarted = false;
+let isJumping = false;
+
 
 /* =========================================
    PLAYER LANES
 ========================================= */
 
 /*
-   0 = Left lane
-   1 = Center lane
-   2 = Right lane
+    0 = LEFT
+    1 = CENTER
+    2 = RIGHT
 */
 
 let currentLane = 1;
+
+
+/*
+    These percentages determine
+    the horizontal position of
+    the runner.
+
+    We will fine-tune these later
+    after seeing the actual road.
+*/
 
 const lanes = [
     38,
@@ -36,8 +50,9 @@ const lanes = [
     62
 ];
 
+
 /* =========================================
-   PLAYER MOVEMENT
+   INITIAL PLAYER POSITION
 ========================================= */
 
 function updatePlayerLane() {
@@ -99,13 +114,165 @@ function jump() {
         return;
     }
 
-    player.style.bottom = "24vh";
+    if (isJumping) {
+        return;
+    }
+
+    isJumping = true;
+
+    player.classList.add("jumping");
+
+
+    /*
+        Jump animation duration.
+    */
 
     setTimeout(() => {
 
-        player.style.bottom = "9vh";
+        player.classList.remove("jumping");
 
-    }, 500);
+        isJumping = false;
+
+    }, 550);
+
+}
+
+
+/* =========================================
+   SWIPE CONTROL
+========================================= */
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+let touchEndX = 0;
+let touchEndY = 0;
+
+
+/*
+    Minimum distance required
+    for a swipe to be detected.
+*/
+
+const SWIPE_THRESHOLD = 40;
+
+
+/* =========================================
+   TOUCH START
+========================================= */
+
+document.addEventListener(
+    "touchstart",
+    function(event) {
+
+        if (!gameStarted) {
+            return;
+        }
+
+        const touch = event.changedTouches[0];
+
+        touchStartX = touch.screenX;
+        touchStartY = touch.screenY;
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================
+   TOUCH END
+========================================= */
+
+document.addEventListener(
+    "touchend",
+    function(event) {
+
+        if (!gameStarted) {
+            return;
+        }
+
+        const touch = event.changedTouches[0];
+
+        touchEndX = touch.screenX;
+        touchEndY = touch.screenY;
+
+        handleSwipe();
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================
+   PROCESS SWIPE
+========================================= */
+
+function handleSwipe() {
+
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+
+    /*
+        Ignore very small finger movements.
+    */
+
+    if (
+        absX < SWIPE_THRESHOLD &&
+        absY < SWIPE_THRESHOLD
+    ) {
+        return;
+    }
+
+
+    /*
+        Horizontal swipe
+        is stronger than vertical.
+    */
+
+    if (absX > absY) {
+
+        if (deltaX < 0) {
+
+            // Swipe LEFT
+            moveLeft();
+
+        } else {
+
+            // Swipe RIGHT
+            moveRight();
+
+        }
+
+    }
+
+
+    /*
+        Vertical swipe
+    */
+
+    else {
+
+        if (deltaY < 0) {
+
+            // Swipe UP
+            jump();
+
+        }
+
+        /*
+            Swipe DOWN intentionally
+            does nothing for now.
+        */
+
+    }
 
 }
 
@@ -128,26 +295,6 @@ function startGame() {
 
 
 /* =========================================
-   TOUCH CONTROLS
-========================================= */
-
-leftButton.addEventListener(
-    "pointerdown",
-    moveLeft
-);
-
-rightButton.addEventListener(
-    "pointerdown",
-    moveRight
-);
-
-jumpButton.addEventListener(
-    "pointerdown",
-    jump
-);
-
-
-/* =========================================
    START BUTTON
 ========================================= */
 
@@ -165,22 +312,42 @@ document.addEventListener(
     "keydown",
     function(event) {
 
-        if (event.key === "ArrowLeft" ||
-            event.key.toLowerCase() === "a") {
+        /*
+            LEFT
+        */
+
+        if (
+            event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a"
+        ) {
 
             moveLeft();
 
         }
 
-        if (event.key === "ArrowRight" ||
-            event.key.toLowerCase() === "d") {
+
+        /*
+            RIGHT
+        */
+
+        if (
+            event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d"
+        ) {
 
             moveRight();
 
         }
 
-        if (event.key === "ArrowUp" ||
-            event.key === " ") {
+
+        /*
+            JUMP
+        */
+
+        if (
+            event.key === "ArrowUp" ||
+            event.key === " "
+        ) {
 
             event.preventDefault();
 
@@ -193,7 +360,7 @@ document.addEventListener(
 
 
 /* =========================================
-   INITIAL POSITION
+   INITIALIZATION
 ========================================= */
 
 updatePlayerLane();
