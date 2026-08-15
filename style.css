@@ -15,9 +15,8 @@ body {
 body {
     font-family: Arial, sans-serif;
     background: #000;
-    touch-action: manipulation;
+    touch-action: none;
 }
-
 /* =========================
    GAME
 ========================= */
@@ -80,7 +79,6 @@ body {
 /* =========================
    PLAYER
 ========================= */
-
 #player {
     position: absolute;
 
@@ -99,9 +97,24 @@ body {
 
     transition:
         left 0.18s ease,
-        bottom 0.18s ease;
+        bottom 0.18s ease,
+        transform 0.18s ease;
 }
 
+
+/* =========================================
+   JUMP
+========================================= */
+
+#player.jumping {
+
+    bottom: 24vh;
+
+    transform:
+        translateX(-50%)
+        scale(1.05);
+
+}
 /* =========================
    HUD
 ========================= */
@@ -286,4 +299,31 @@ body {
         width: 55px;
         height: 55px;
     }
+}
+
+/* =========================================
+   RUNNING MOTION
+========================================= */
+
+#game.running #player {
+
+    animation: runnerBounce 0.28s infinite alternate;
+
+}
+
+
+@keyframes runnerBounce {
+
+    from {
+
+        margin-bottom: 0;
+
+    }
+
+    to {
+
+        margin-bottom: 5px;
+
+    }
+
 }
