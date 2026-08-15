@@ -56,6 +56,9 @@ body {
 /* =========================
    ROAD
 ========================= */
+/* =========================
+   ROAD
+========================= */
 
 #road {
     position: absolute;
@@ -74,6 +77,40 @@ body {
     background-size: 100% 100%;
 
     z-index: 2;
+
+    transform-origin: center bottom;
+}
+
+
+/* =========================================
+   ROAD RUNNING EFFECT
+========================================= */
+
+#game.running #road {
+
+    animation: roadMotion 0.7s infinite alternate;
+
+}
+
+
+@keyframes roadMotion {
+
+    from {
+
+        transform:
+            translateX(-50%)
+            scaleY(1);
+
+    }
+
+    to {
+
+        transform:
+            translateX(-50%)
+            scaleY(1.025);
+
+    }
+
 }
 
 /* =========================
