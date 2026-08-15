@@ -287,13 +287,13 @@ function startGame() {
 
     startScreen.style.display = "none";
 
+    document.getElementById("game").classList.add("running");
+
     currentLane = 1;
 
     updatePlayerLane();
 
 }
-
-
 /* =========================================
    START BUTTON
 ========================================= */
