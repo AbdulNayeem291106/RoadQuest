@@ -1,8 +1,15 @@
 /* =========================================
    ROADQUEST
-   PHASE 5
-   Runner Movement + Swipe Controls
+   PHASE 6
+   Perspective + Moving Obstacles
 ========================================= */
+
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const game = document.getElementById("game");
 
 const player = document.getElementById("player");
 
@@ -19,6 +26,8 @@ const giftCount = document.getElementById("giftCount");
 ========================================= */
 
 let gameStarted = false;
+let gameOver = false;
+
 let isJumping = false;
 
 
@@ -36,28 +45,29 @@ let currentLane = 1;
 
 
 /*
-    These percentages determine
-    the horizontal position of
-    the runner.
+    The runner's position at the
+    bottom of the road.
 
-    We will fine-tune these later
-    after seeing the actual road.
+    These values correspond much
+    better to the visible three
+    road lanes.
 */
 
-const lanes = [
-    38,
+const playerLaneX = [
+    17,
     50,
-    62
+    83
 ];
 
 
 /* =========================================
-   INITIAL PLAYER POSITION
+   PLAYER POSITION
 ========================================= */
 
 function updatePlayerLane() {
 
-    player.style.left = lanes[currentLane] + "%";
+    player.style.left =
+        playerLaneX[currentLane] + "%";
 
 }
 
@@ -68,7 +78,7 @@ function updatePlayerLane() {
 
 function moveLeft() {
 
-    if (!gameStarted) {
+    if (!gameStarted || gameOver) {
         return;
     }
 
@@ -89,7 +99,7 @@ function moveLeft() {
 
 function moveRight() {
 
-    if (!gameStarted) {
+    if (!gameStarted || gameOver) {
         return;
     }
 
@@ -110,7 +120,7 @@ function moveRight() {
 
 function jump() {
 
-    if (!gameStarted) {
+    if (!gameStarted || gameOver) {
         return;
     }
 
@@ -122,10 +132,6 @@ function jump() {
 
     player.classList.add("jumping");
 
-
-    /*
-        Jump animation duration.
-    */
 
     setTimeout(() => {
 
@@ -139,7 +145,726 @@ function jump() {
 
 
 /* =========================================
-   SWIPE CONTROL
+   OBSTACLE SYSTEM
+========================================= */
+
+let obstacles = [];
+
+let obstacleTimer = null;
+
+let lastObstacleTime = 0;
+
+
+/*
+    Minimum time between obstacle
+    spawns.
+
+    We start relatively slowly
+    so the game is easy to test.
+*/
+
+const OBSTACLE_INTERVAL = 1300;
+
+
+/*
+    Obstacle speed.
+
+    Higher number = faster.
+*/
+
+const OBSTACLE_SPEED = 0.00038;
+
+
+/*
+    Starting depth.
+
+    0 = far distance
+
+    1 = player position
+*/
+
+const START_DEPTH = 0;
+
+
+/*
+    Collision depth.
+
+    When obstacle reaches this
+    depth, it is close enough to
+    collide with the runner.
+*/
+
+const COLLISION_DEPTH = 0.88;
+
+
+/* =========================================
+   LANE PERSPECTIVE
+========================================= */
+
+/*
+    Lane separation at the player's
+    position.
+
+    The road converges toward the
+    center as objects move farther
+    away.
+*/
+
+const laneOffset = [
+    -33,
+    0,
+    33
+];
+
+
+/*
+    Calculate horizontal position
+    according to perspective.
+*/
+
+function getLaneX(lane, depth) {
+
+    const offset =
+        laneOffset[lane] * depth;
+
+    return 50 + offset;
+
+}
+
+
+/* =========================================
+   DEPTH → SCREEN POSITION
+========================================= */
+
+function getObstacleY(depth) {
+
+    /*
+        The obstacle begins near the
+        horizon and moves toward the
+        bottom of the screen.
+    */
+
+    const horizonY = 30;
+
+    const playerY = 82;
+
+    return horizonY +
+        ((playerY - horizonY) * depth);
+
+}
+
+
+/* =========================================
+   OBSTACLE SCALE
+========================================= */
+
+function getObstacleScale(depth) {
+
+    /*
+        Small when far away.
+        Large near player.
+    */
+
+    return 0.15 + (depth * 1.05);
+
+}
+
+
+/* =========================================
+   CREATE OBSTACLE
+========================================= */
+
+function createObstacle() {
+
+    if (!gameStarted || gameOver) {
+        return;
+    }
+
+
+    /*
+        Random lane.
+    */
+
+    const lane =
+        Math.floor(Math.random() * 3);
+
+
+    /*
+        Random obstacle.
+
+        50% car
+        50% barricade
+    */
+
+    const type =
+        Math.random() < 0.5
+            ? "car"
+            : "barricade";
+
+
+    const obstacle =
+        document.createElement("img");
+
+
+    obstacle.classList.add(
+        "obstacle"
+    );
+
+
+    if (type === "car") {
+
+        obstacle.src = "car.png";
+
+        obstacle.classList.add(
+            "car-obstacle"
+        );
+
+    } else {
+
+        obstacle.src =
+            "barricade.png";
+
+        obstacle.classList.add(
+            "barricade-obstacle"
+        );
+
+    }
+
+
+    obstacle.alt = "";
+
+
+    /*
+        Store obstacle information.
+    */
+
+    const obstacleData = {
+
+        element: obstacle,
+
+        lane: lane,
+
+        depth: START_DEPTH,
+
+        type: type,
+
+        active: true
+
+    };
+
+
+    obstacles.push(obstacleData);
+
+
+    game.appendChild(obstacle);
+
+
+    updateObstaclePosition(
+        obstacleData
+    );
+
+}
+
+
+/* =========================================
+   UPDATE OBSTACLE POSITION
+========================================= */
+
+function updateObstaclePosition(
+    obstacle
+) {
+
+    const depth =
+        obstacle.depth;
+
+
+    const x =
+        getLaneX(
+            obstacle.lane,
+            depth
+        );
+
+
+    const y =
+        getObstacleY(depth);
+
+
+    const scale =
+        getObstacleScale(depth);
+
+
+    obstacle.element.style.left =
+        x + "%";
+
+
+    obstacle.element.style.top =
+        y + "%";
+
+
+    obstacle.element.style.transform =
+        `translate(-50%, -50%) scale(${scale})`;
+
+
+    /*
+        Obstacles farther away should
+        appear behind nearby objects.
+    */
+
+    obstacle.element.style.zIndex =
+        Math.floor(
+            10 + depth * 20
+        );
+
+}
+
+
+/* =========================================
+   COLLISION DETECTION
+========================================= */
+
+function checkCollision(
+    obstacle
+) {
+
+    /*
+        Only check when the obstacle
+        is close to the player.
+    */
+
+    if (
+        obstacle.depth <
+        COLLISION_DEPTH
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+        Different lane = no collision.
+    */
+
+    if (
+        obstacle.lane !==
+        currentLane
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+        If the player is jumping,
+        the barricade can be avoided.
+
+        Cars remain dangerous even
+        while jumping in this phase.
+    */
+
+    if (
+        obstacle.type ===
+        "barricade" &&
+        isJumping
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================
+   REMOVE OBSTACLE
+========================================= */
+
+function removeObstacle(
+    obstacle
+) {
+
+    obstacle.active = false;
+
+
+    if (
+        obstacle.element &&
+        obstacle.element.parentNode
+    ) {
+
+        obstacle.element.parentNode
+            .removeChild(
+                obstacle.element
+            );
+
+    }
+
+}
+
+
+/* =========================================
+   GAME LOOP
+========================================= */
+
+let lastFrameTime = 0;
+
+
+function gameLoop(
+    timestamp
+) {
+
+    if (!gameStarted) {
+
+        requestAnimationFrame(
+            gameLoop
+        );
+
+        return;
+
+    }
+
+
+    if (gameOver) {
+
+        return;
+
+    }
+
+
+    /*
+        Calculate frame time.
+    */
+
+    if (!lastFrameTime) {
+
+        lastFrameTime =
+            timestamp;
+
+    }
+
+
+    const deltaTime =
+        timestamp -
+        lastFrameTime;
+
+
+    lastFrameTime =
+        timestamp;
+
+
+    /*
+        Create obstacles
+        periodically.
+    */
+
+    if (
+        timestamp -
+        lastObstacleTime
+        >=
+        OBSTACLE_INTERVAL
+    ) {
+
+        createObstacle();
+
+        lastObstacleTime =
+            timestamp;
+
+    }
+
+
+    /*
+        Move all obstacles.
+    */
+
+    for (
+        let i = obstacles.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const obstacle =
+            obstacles[i];
+
+
+        if (!obstacle.active) {
+
+            continue;
+
+        }
+
+
+        /*
+            Move toward player.
+        */
+
+        obstacle.depth +=
+            OBSTACLE_SPEED *
+            deltaTime;
+
+
+        /*
+            Update visual position.
+        */
+
+        updateObstaclePosition(
+            obstacle
+        );
+
+
+        /*
+            Check collision.
+        */
+
+        if (
+            checkCollision(
+                obstacle
+            )
+        ) {
+
+            endGame();
+
+            return;
+
+        }
+
+
+        /*
+            Remove after passing
+            the player.
+        */
+
+        if (
+            obstacle.depth > 1.15
+        ) {
+
+            removeObstacle(
+                obstacle
+            );
+
+            obstacles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================================
+   START GAME
+========================================= */
+
+function startGame() {
+
+    gameStarted = true;
+
+    gameOver = false;
+
+    isJumping = false;
+
+
+    startScreen.style.display =
+        "none";
+
+
+    game.classList.add(
+        "running"
+    );
+
+
+    currentLane = 1;
+
+    updatePlayerLane();
+
+
+    /*
+        Reset obstacle system.
+    */
+
+    obstacles = [];
+
+    lastObstacleTime =
+        performance.now();
+
+
+    lastFrameTime = 0;
+
+
+    /*
+        Remove any old obstacles.
+    */
+
+    document
+        .querySelectorAll(
+            ".obstacle"
+        )
+        .forEach(
+            obstacle => obstacle.remove()
+        );
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================================
+   GAME OVER
+========================================= */
+
+function endGame() {
+
+    gameOver = true;
+
+    gameStarted = false;
+
+
+    game.classList.remove(
+        "running"
+    );
+
+
+    /*
+        Stop all obstacles.
+    */
+
+    obstacles.forEach(
+        obstacle => {
+
+            removeObstacle(
+                obstacle
+            );
+
+        }
+    );
+
+
+    obstacles = [];
+
+
+    /*
+        Show Game Over screen.
+    */
+
+    showGameOver();
+
+}
+
+
+/* =========================================
+   GAME OVER SCREEN
+========================================= */
+
+function showGameOver() {
+
+    startScreen.style.display =
+        "block";
+
+
+    startScreen.innerHTML = `
+
+        <h1>Game Over</h1>
+
+        <p>
+            You hit an obstacle!
+        </p>
+
+        <button id="restartButton">
+            PLAY AGAIN
+        </button>
+
+    `;
+
+
+    document
+        .getElementById(
+            "restartButton"
+        )
+        .addEventListener(
+            "click",
+            restartGame
+        );
+
+}
+
+
+/* =========================================
+   RESTART GAME
+========================================= */
+
+function restartGame() {
+
+    /*
+        Reset counters for now.
+    */
+
+    coinCount.textContent =
+        "0";
+
+    balloonCount.textContent =
+        "0";
+
+    giftCount.textContent =
+        "0";
+
+
+    /*
+        Restore start screen.
+    */
+
+    startScreen.innerHTML = `
+
+        <h1>RoadQuest</h1>
+
+        <p>
+            Run • Dodge • Collect
+        </p>
+
+        <button id="startButton">
+            START GAME
+        </button>
+
+    `;
+
+
+    /*
+        Reconnect start button.
+    */
+
+    document
+        .getElementById(
+            "startButton"
+        )
+        .addEventListener(
+            "click",
+            startGame
+        );
+
+
+    startScreen.style.display =
+        "block";
+
+
+    gameOver = false;
+
+}
+
+
+/* =========================================
+   SWIPE CONTROLS
 ========================================= */
 
 let touchStartX = 0;
@@ -148,11 +873,6 @@ let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
 
-
-/*
-    Minimum distance required
-    for a swipe to be detected.
-*/
 
 const SWIPE_THRESHOLD = 40;
 
@@ -169,10 +889,17 @@ document.addEventListener(
             return;
         }
 
-        const touch = event.changedTouches[0];
 
-        touchStartX = touch.screenX;
-        touchStartY = touch.screenY;
+        const touch =
+            event.changedTouches[0];
+
+
+        touchStartX =
+            touch.screenX;
+
+
+        touchStartY =
+            touch.screenY;
 
     },
     {
@@ -193,10 +920,18 @@ document.addEventListener(
             return;
         }
 
-        const touch = event.changedTouches[0];
 
-        touchEndX = touch.screenX;
-        touchEndY = touch.screenY;
+        const touch =
+            event.changedTouches[0];
+
+
+        touchEndX =
+            touch.screenX;
+
+
+        touchEndY =
+            touch.screenY;
+
 
         handleSwipe();
 
@@ -208,45 +943,55 @@ document.addEventListener(
 
 
 /* =========================================
-   PROCESS SWIPE
+   HANDLE SWIPE
 ========================================= */
 
 function handleSwipe() {
 
-    const deltaX = touchEndX - touchStartX;
-    const deltaY = touchEndY - touchStartY;
+    const deltaX =
+        touchEndX -
+        touchStartX;
 
-    const absX = Math.abs(deltaX);
-    const absY = Math.abs(deltaY);
+
+    const deltaY =
+        touchEndY -
+        touchStartY;
+
+
+    const absX =
+        Math.abs(deltaX);
+
+
+    const absY =
+        Math.abs(deltaY);
 
 
     /*
-        Ignore very small finger movements.
+        Ignore tiny movements.
     */
 
     if (
         absX < SWIPE_THRESHOLD &&
         absY < SWIPE_THRESHOLD
     ) {
+
         return;
+
     }
 
 
     /*
-        Horizontal swipe
-        is stronger than vertical.
+        Horizontal swipe.
     */
 
     if (absX > absY) {
 
         if (deltaX < 0) {
 
-            // Swipe LEFT
             moveLeft();
 
         } else {
 
-            // Swipe RIGHT
             moveRight();
 
         }
@@ -255,53 +1000,20 @@ function handleSwipe() {
 
 
     /*
-        Vertical swipe
+        Vertical swipe.
     */
 
     else {
 
         if (deltaY < 0) {
 
-            // Swipe UP
             jump();
 
         }
 
-        /*
-            Swipe DOWN intentionally
-            does nothing for now.
-        */
-
     }
 
 }
-
-
-/* =========================================
-   START GAME
-========================================= */
-
-function startGame() {
-
-    gameStarted = true;
-
-    startScreen.style.display = "none";
-
-    document.getElementById("game").classList.add("running");
-
-    currentLane = 1;
-
-    updatePlayerLane();
-
-}
-/* =========================================
-   START BUTTON
-========================================= */
-
-startButton.addEventListener(
-    "click",
-    startGame
-);
 
 
 /* =========================================
@@ -311,10 +1023,6 @@ startButton.addEventListener(
 document.addEventListener(
     "keydown",
     function(event) {
-
-        /*
-            LEFT
-        */
 
         if (
             event.key === "ArrowLeft" ||
@@ -326,10 +1034,6 @@ document.addEventListener(
         }
 
 
-        /*
-            RIGHT
-        */
-
         if (
             event.key === "ArrowRight" ||
             event.key.toLowerCase() === "d"
@@ -339,10 +1043,6 @@ document.addEventListener(
 
         }
 
-
-        /*
-            JUMP
-        */
 
         if (
             event.key === "ArrowUp" ||
@@ -360,7 +1060,7 @@ document.addEventListener(
 
 
 /* =========================================
-   INITIALIZATION
+   INITIAL POSITION
 ========================================= */
 
 updatePlayerLane();
