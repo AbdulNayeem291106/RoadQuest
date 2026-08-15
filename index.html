@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>RoadQuest</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main id="game">
+
+        <!-- SKY -->
+        <div id="sky"></div>
+
+        <!-- ROAD -->
+        <div id="road"></div>
+
+        <!-- PLAYER -->
+        <img
+            id="player"
+            src="runner.png"
+            alt="Runner"
+        >
+
+        <!-- GAME HUD -->
+        <div id="hud">
+
+            <div class="hud-box">
+                🪙 <span id="coinCount">0</span>/500
+            </div>
+
+            <div class="hud-box">
+                🎈 <span id="balloonCount">0</span>/50
+            </div>
+
+            <div class="hud-box">
+                🎁 <span id="giftCount">0</span>
+            </div>
+
+        </div>
+
+        <!-- TARGET WORD -->
+        <div id="wordPanel">
+
+            <div class="word-title">
+                Target Word
+            </div>
+
+            <div id="targetWord">
+                <span class="letter">?</span>
+            </div>
+
+        </div>
+
+        <!-- START SCREEN -->
+        <section id="startScreen">
+
+            <h1>RoadQuest</h1>
+
+            <p>
+                Run • Dodge • Collect • Complete
+            </p>
+
+            <button id="startButton">
+                START GAME
+            </button>
+
+        </section>
+
+        <!-- MOBILE CONTROLS -->
+        <div id="controls">
+
+            <button id="leftButton">
+                ◀
+            </button>
+
+            <button id="jumpButton">
+                ▲
+            </button>
+
+            <button id="rightButton">
+                ▶
+            </button>
+
+        </div>
+
+    </main>
+
+    <script src="game.js"></script>
+
+</body>
+</html>
