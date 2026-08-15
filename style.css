@@ -364,3 +364,52 @@ body {
     }
 
 }
+
+/* =========================================
+   PHASE 6
+   OBSTACLES
+========================================= */
+
+.obstacle {
+
+    position: absolute;
+
+    left: 50%;
+    top: 30%;
+
+    width: 120px;
+    height: auto;
+
+    object-fit: contain;
+
+    pointer-events: none;
+
+    user-select: none;
+
+    -webkit-user-drag: none;
+
+    transform-origin: center center;
+
+}
+
+
+/* =========================================
+   CAR
+========================================= */
+
+.car-obstacle {
+
+    width: 150px;
+
+}
+
+
+/* =========================================
+   BARRICADE
+========================================= */
+
+.barricade-obstacle {
+
+    width: 180px;
+
+}
