@@ -660,7 +660,6 @@ function gameLoop(
 
 }
 
-
 /* =========================================
    START GAME
 ========================================= */
@@ -673,54 +672,27 @@ function startGame() {
 
     isJumping = false;
 
+    startScreen.style.display = "none";
 
-    startScreen.style.display =
-        "none";
-
-
-    game.classList.add(
-        "running"
-    );
-
+    game.classList.add("running");
 
     currentLane = 1;
 
     updatePlayerLane();
 
-
-    /*
-        Reset obstacle system.
-    */
-
     obstacles = [];
 
-    lastObstacleTime =
-        performance.now();
-
+    lastObstacleTime = performance.now();
 
     lastFrameTime = 0;
 
-
-    /*
-        Remove any old obstacles.
-    */
-
     document
-        .querySelectorAll(
-            ".obstacle"
-        )
-        .forEach(
-            obstacle => obstacle.remove()
-        );
+        .querySelectorAll(".obstacle")
+        .forEach(obstacle => obstacle.remove());
 
-
-    requestAnimationFrame(
-        gameLoop
-    );
+    requestAnimationFrame(gameLoop);
 
 }
-
-
 /* =========================================
    GAME OVER
 ========================================= */
