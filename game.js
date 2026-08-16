@@ -344,7 +344,10 @@ function createObstacle() {
 
         lane: lane,
 
-        depth: START_DEPTH,
+depth:
+    type === "car"
+        ? START_DEPTH
+        : 0.72,
 
         type: type,
 
