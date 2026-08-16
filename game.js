@@ -1,3 +1,4 @@
+alert("RoadQuest JavaScript loaded!");
 /* =========================================
    ROADQUEST
    PHASE 6
