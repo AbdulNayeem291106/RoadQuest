@@ -1036,3 +1036,13 @@ document.addEventListener(
 ========================================= */
 
 updatePlayerLane();
+
+
+/* =========================================
+   START BUTTON
+========================================= */
+
+startButton.addEventListener(
+    "click",
+    startGame
+);
