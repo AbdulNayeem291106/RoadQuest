@@ -802,7 +802,7 @@ function restartGame() {
         <h1>RoadQuest</h1>
 
         <p>
-            Run • Dodge • Collect
+             Run • Dodge • Collect • Complete
         </p>
 
         <button id="startButton">
