@@ -60,7 +60,7 @@ body {
     position: absolute;
 
     left: 50%;
-    bottom: 0;
+    top: 28vh;
 
     width: 100vw;
     height: 72vh;
@@ -68,17 +68,17 @@ body {
     transform: translateX(-50%);
 
     background-image: url("road.png");
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: 100% 100%;
+
+    background-repeat: repeat-y;
+
+    background-position: center 0;
+
+    background-size: 100% auto;
 
     z-index: 2;
 
-    transform-origin: center bottom;
+    will-change: background-position;
 }
-
-
-
 
 /* =========================
    PLAYER
