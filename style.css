@@ -78,36 +78,7 @@ body {
 }
 
 
-/* =========================================
-   ROAD RUNNING EFFECT
-========================================= */
 
-#game.running #road {
-
-    animation: roadMotion 0.7s infinite alternate;
-
-}
-
-
-@keyframes roadMotion {
-
-    from {
-
-        transform:
-            translateX(-50%)
-            scaleY(1);
-
-    }
-
-    to {
-
-        transform:
-            translateX(-50%)
-            scaleY(1.025);
-
-    }
-
-}
 
 /* =========================
    PLAYER
