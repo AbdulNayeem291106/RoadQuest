@@ -339,22 +339,40 @@ body {
 
 #game.running #player {
 
-    animation: runnerBounce 0.28s infinite alternate;
+    animation: runnerRun 0.28s infinite alternate;
 
 }
 
 
-@keyframes runnerBounce {
+@keyframes runnerRun {
 
-    from {
+    0% {
 
         margin-bottom: 0;
 
+        transform:
+            translateX(-50%)
+            scaleY(1);
+
     }
 
-    to {
+    50% {
 
-        margin-bottom: 5px;
+        margin-bottom: 3px;
+
+        transform:
+            translateX(-50%)
+            scaleY(0.98);
+
+    }
+
+    100% {
+
+        margin-bottom: 6px;
+
+        transform:
+            translateX(-50%)
+            scaleY(1);
 
     }
 
