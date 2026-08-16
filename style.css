@@ -80,6 +80,36 @@ body {
     will-change: background-position;
 }
 
+/* =========================================
+   FORWARD ROAD MOTION
+========================================= */
+
+#game.running #road {
+
+    animation: roadScroll 0.45s linear infinite;
+
+}
+
+
+@keyframes roadScroll {
+
+    from {
+
+        background-position:
+            center 0;
+
+    }
+
+    to {
+
+        background-position:
+            center 100%;
+
+    }
+
+}
+
+
 /* =========================
    PLAYER
 ========================= */
