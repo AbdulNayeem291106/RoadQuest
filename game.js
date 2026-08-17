@@ -599,13 +599,9 @@ function gameLoop(
             Move toward player.
         */
 
-        if (obstacle.type === "car") {
-
-    obstacle.depth +=
-        OBSTACLE_SPEED *
-        deltaTime;
-
-}
+        obstacle.depth +=
+    OBSTACLE_SPEED *
+    deltaTime;
 
         /*
             Update visual position.
