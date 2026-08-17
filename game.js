@@ -338,23 +338,19 @@ function createObstacle() {
         Store obstacle information.
     */
 
-    const obstacleData = {
+const obstacleData = {
 
-        element: obstacle,
+    element: obstacle,
 
-        lane: lane,
+    lane: lane,
 
-depth:
-    type === "car"
-        ? START_DEPTH
-        : 0.72,
+    depth: START_DEPTH,
 
-        type: type,
+    type: type,
 
-        active: true
+    active: true
 
-    };
-
+};
 
     obstacles.push(obstacleData);
 
